@@ -1,11 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 )
 
 func main() {
-	http.HandleFunc("/Info/", infoHandler)
-	http.HandleFunc("/PerformNextMove/", performNextMove)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", &server{})
+}
+
+type server struct{}
+
+func (h *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	uri := r.URL.Path
+	fmt.Printf("Handling: %s\n", uri)
+	if strings.Contains(uri, "PerformNextMove") {
+		performNextMove(w, r)
+	} else {
+		infoHandler(w, r)
+	}
 }

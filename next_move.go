@@ -15,7 +15,7 @@ func performNextMove(w http.ResponseWriter, r *http.Request) {
 	gs := GameState{}
 	err = json.Unmarshal(bb, &gs)
 	if err != nil {
-		fmt.Println("Can't unmarshal", err)
+		fmt.Println("Can't unmarshal", err, string(bb))
 	}
 	nm := BotMove{
 		Direction: Up,

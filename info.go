@@ -10,7 +10,7 @@ type info struct {
 	Name        string `json:"Name"`
 	Avatar      string `json:"AvatarUrl"`
 	Description string `json:"Description"`
-	GameType    string `json:"TankBlaster"`
+	GameType    string `json:"GameType"`
 }
 
 func infoHandler(w http.ResponseWriter, r *http.Request) {
