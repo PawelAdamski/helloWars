@@ -1,11 +1,10 @@
 package main
 
 import (
-	"os"
-	"fmt"
+	"net/http"
 )
 
 func main() {
-	fmt.Print("Hello-wars")
-	os.Exit(0)
+	http.HandleFunc("/Info/", infoHandler)
+	http.ListenAndServe(":8080", nil)
 }
