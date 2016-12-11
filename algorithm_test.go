@@ -72,6 +72,9 @@ func (s *ParsingSuite) TestParsing(c *C) {
 		ExplosionRadius:     2,
 		RoundsUntilExplodes: 3,
 	}
+	if state.GameConfig.MapHeight != 20 {
+		t.Fatalf("GameConfig.MapHeight is %d", state.GameConfig.MapHeight)
+	}
 	c.Assert(state.Bombs, DeepEquals, []Bomb{expectedBomb})
 	col1 := []int{2, 2, 3}
 	col2 := []int{0, 0, 1}

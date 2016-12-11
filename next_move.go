@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func performNextMove(w http.ResponseWriter, r *http.Request) {
+func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
 	bb, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("Can't read input", err)

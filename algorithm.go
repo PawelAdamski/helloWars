@@ -18,6 +18,17 @@ type GameState struct {
 	OpponentLocations  []Location
 	Bombs              []Bomb
 	Missiles           []Missile
+	GameConfig         GameConfig
+}
+
+type GameConfig struct {
+	MapWidth                          int
+	MapHeight                         int
+	BombBlastRadius                   int
+	MissileBlastRadius                int
+	RoundsBetweenMissiles             int
+	RoundsBeforeIncreasingBlastRadius int
+	IsFastMissileModeEnabled          bool
 }
 
 type Location struct {
