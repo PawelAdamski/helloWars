@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"encoding/json"
@@ -63,7 +63,7 @@ func (s *ParsingSuite) TestParsing(c *C) {
         "IsFastMissileModeEnabled": true
     }
 }`
-	state := GameState{}
+	state := State{}
 	err := json.Unmarshal([]byte(input), &state)
 	c.Assert(err, IsNil)
 	c.Assert(state.BotLocation, Equals, Location{x: 0, y: 0})

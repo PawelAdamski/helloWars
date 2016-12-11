@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/PawelAdamski/helloWars/game"
 )
 
 func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,14 +14,14 @@ func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Can't read input", err)
 	}
-	gs := GameState{}
+	gs := game.State{}
 	err = json.Unmarshal(bb, &gs)
 	if err != nil {
 		fmt.Println("Can't unmarshal", err, string(bb))
 	}
-	nm := BotMove{
-		Direction: Up,
-		Action:    None,
+	nm := game.BotMove{
+		Direction: game.Up,
+		Action:    game.None,
 	}
 	bb, err = json.Marshal(nm)
 	if err != nil {

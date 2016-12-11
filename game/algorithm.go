@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"strconv"
@@ -6,22 +6,25 @@ import (
 )
 
 type Algorithm interface {
-	nextAction(GameState) BotMove
+	nextAction(State) BotMove
 }
 
+// Board of the game
 type Board [][]int
 
-type GameState struct {
-	Board              [][]int
+// State is received each turn
+type State struct {
+	Board              Board
 	BotLocation        Location
 	IsMissileAvailable bool
 	OpponentLocations  []Location
 	Bombs              []Bomb
 	Missiles           []Missile
-	GameConfig         GameConfig
+	GameConfig         Config
 }
 
-type GameConfig struct {
+// Config of the game
+type Config struct {
 	MapWidth                          int
 	MapHeight                         int
 	BombBlastRadius                   int
@@ -31,11 +34,13 @@ type GameConfig struct {
 	IsFastMissileModeEnabled          bool
 }
 
+// Location description
 type Location struct {
 	x int
 	y int
 }
 
+// UnmarshalJSON implements json interface
 func (l *Location) UnmarshalJSON(data []byte) error {
 
 	s := string(data)
@@ -51,18 +56,21 @@ func (l *Location) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Bomb info
 type Bomb struct {
 	RoundsUntilExplodes int
 	Location            Location
 	ExplosionRadius     int
 }
 
+// Missile info
 type Missile struct {
 	MoveDirection   int
 	Location        Location
 	ExplosionRadius int
 }
 
+// BotMove returned to handler
 type BotMove struct {
 	Direction     int
 	Action        int
