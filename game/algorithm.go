@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+const directions = []Direction{
+	Direction{X: 0, Y: 1},
+	Direction{X: 0, Y: -1},
+	Direction{X: 1, Y: 0},
+	Direction{X: -1, Y: 0},
+}
+
 type Algorithm interface {
 	nextAction(State) BotMove
 }
@@ -18,7 +25,7 @@ type State struct {
 	BotLocation        Location
 	IsMissileAvailable bool
 	OpponentLocations  []Location
-	Bombs              []Bomb
+	Bombs              Bombs
 	Missiles           []Missile
 	GameConfig         Config
 }
@@ -51,6 +58,8 @@ type Location struct {
 	X int
 	Y int
 }
+
+type Direction Location
 
 // Distance between points
 func (l *Location) Distance(other *Location) int {
@@ -110,6 +119,31 @@ func (b *Bomb) IsInRadius(l Location) bool {
 	return b.Location.Distance(l) <= b.ExplosionRadius
 }
 
+type Bombs []Bomb
+
+func (bs Bombs) decreaseCounters() {
+	for i, _ := range bs {
+		bs[i].RoundsUntilExplodes--
+	}
+}
+
+func (bs Bombs) findExploding() (int, Bomb) {
+	for i, b := range bs {
+		if b.RoundsUntilExplodes == 0 {
+			return i, b
+		}
+	}
+	return -1, Bomb{}
+}
+
+func (bs Bombs) findChainedExplosions(l Location) {
+	for i := range bs {
+		if bs[i].Location == l {
+			bs[i].RoundsUntilExplodes = 0
+		}
+	}
+}
+
 // Missile info
 type Missile struct {
 	MoveDirection   int
@@ -141,3 +175,15 @@ const Empty = 0
 const Regular = 1
 const Fortified = 2
 const Indestructible = 3
+
+type ByLocation []Location
+
+func (a ByLocation) Len() int      { return len(a) }
+func (a ByLocation) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByLocation) Less(i, j int) bool {
+	if a[i].X != a[j].X {
+		return a[i].X < a[j].X
+	} else {
+		return a[i].Y != a[j].Y
+	}
+}
