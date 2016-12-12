@@ -15,16 +15,14 @@ const (
 	OpponentDead OutcomeType = 1
 )
 
-func IsSafeFromBombs(gs game.State, loc game.Location, time int, depth int) bool {
-	fmt.Println("Checking", loc.X, loc.Y, time, depth)
-	if isBombThreat(gs, loc, time) {
+func IsSafeFromBombs(gs *game.State, loc game.Location, depth int) bool {
+	nextGS, locs := gs.Next()
+	if locs.Contains(loc) {
 		return false
 	}
 	if depth > 0 {
-		fmt.Println("Moves", loc.Moves(gs))
 		for _, move := range loc.Moves(gs) {
-			if IsSafeFromBombs(gs, move, time+1, depth-1) {
-				fmt.Println("Safe", move.X, move.Y, time, depth)
+			if IsSafeFromBombs(nextGS, move, depth-1) {
 				return true
 			}
 		}

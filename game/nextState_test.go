@@ -31,7 +31,7 @@ func (s *NextStateSuite) TestBombExplosion(c *C) {
 		}}
 	nextState, explosions := state.Next()
 
-	expectedExplosions := []Location{
+	expectedExplosions := Locations{
 		Location{X: 3, Y: 3},
 		Location{X: 1, Y: 3},
 		Location{X: 2, Y: 3},
@@ -70,7 +70,7 @@ func (s *NextStateSuite) TestChainedExplosion(c *C) {
 		}}
 	nextState, explosions := state.Next()
 
-	expectedExplosions := []Location{
+	expectedExplosions := Locations{
 		Location{X: 4, Y: 3},
 		Location{X: 3, Y: 3},
 		Location{X: 2, Y: 3},

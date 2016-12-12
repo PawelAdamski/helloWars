@@ -1,13 +1,14 @@
 package game
 
-func (s *State) Next() (*State, []Location) {
+func (s *State) Next() (*State, Locations) {
 
 	nextState := *s
+	nextState.Bombs = append([]Bomb{}, nextState.Bombs...)
 	explosions := map[Location]bool{}
-	nextState.Bombs.decreaseCounters()
-
 	for bi, b := nextState.Bombs.findExploding(); bi >= 0; bi, b = nextState.Bombs.findExploding() {
-		nextState.Bombs = append(nextState.Bombs[:bi], nextState.Bombs[bi+1:]...)
+		nextState.Bombs = append(
+			append([]Bomb{}, nextState.Bombs[:bi]...),
+			nextState.Bombs[bi+1:]...)
 		for _, d := range directions {
 			l := b.Location
 			explosions[l] = true
@@ -22,13 +23,14 @@ func (s *State) Next() (*State, []Location) {
 		}
 		bi, b = nextState.Bombs.findExploding()
 	}
+	nextState.Bombs.decreaseCounters()
 	return &nextState, toLocationSlice(explosions)
 }
 
-func toLocationSlice(set map[Location]bool) []Location {
+func toLocationSlice(set map[Location]bool) Locations {
 	ls := []Location{}
 	for l := range set {
 		ls = append(ls, l)
 	}
-	return ls
+	return Locations(ls)
 }

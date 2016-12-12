@@ -35,6 +35,9 @@ func (s *State) IsInside(l *Location) bool {
 }
 
 func (s *State) IsEmpty(l *Location) bool {
+	if !s.IsInside(l) {
+		return false
+	}
 	return s.Board[l.X][l.Y] == Empty
 }
 
@@ -57,6 +60,17 @@ type Config struct {
 type Location struct {
 	X int
 	Y int
+}
+
+type Locations []Location
+
+func (ll Locations) Contains(lo Location) bool {
+	for _, l := range ll {
+		if l == lo {
+			return true
+		}
+	}
+	return false
 }
 
 type Direction Location
@@ -93,7 +107,7 @@ func (l *Location) Neighbours(gs State) []Location {
 }
 
 // Distance between points
-func (l *Location) Moves(gs State) []Location {
+func (l *Location) Moves(gs *State) []Location {
 	locs := []Location{}
 	add := func(l Location) {
 		if gs.CanMoveTo(&l) {
@@ -145,7 +159,7 @@ func (bs Bombs) decreaseCounters() {
 
 func (bs Bombs) findExploding() (int, Bomb) {
 	for i, b := range bs {
-		if b.RoundsUntilExplodes == 0 {
+		if b.RoundsUntilExplodes == 1 {
 			return i, b
 		}
 	}
@@ -155,7 +169,7 @@ func (bs Bombs) findExploding() (int, Bomb) {
 func (bs Bombs) findChainedExplosions(l Location) {
 	for i := range bs {
 		if bs[i].Location == l {
-			bs[i].RoundsUntilExplodes = 0
+			bs[i].RoundsUntilExplodes = 1
 		}
 	}
 }
