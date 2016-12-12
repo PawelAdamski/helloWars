@@ -23,15 +23,15 @@ type State struct {
 	GameConfig         Config
 }
 
-func (s *State) IsInside(l Location) bool {
+func (s *State) IsInside(l *Location) bool {
 	return l.X >= 0 && l.X < len(s.Board) && l.Y >= 0 && l.Y < len(s.Board[0])
 }
 
-func (s *State) IsEmpty(l Location) bool {
+func (s *State) IsEmpty(l *Location) bool {
 	return s.Board[l.X][l.Y] == Empty
 }
 
-func (s *State) CanMoveTo(l Location) bool {
+func (s *State) CanMoveTo(l *Location) bool {
 	return s.IsInside(l) && s.IsEmpty(l)
 }
 
@@ -59,7 +59,7 @@ func (l *Location) Distance(other *Location) int {
 		distX = -distX
 	}
 	distY := l.Y - other.Y
-	if distY {
+	if distY < 0 {
 		distY = -distY
 	}
 	if distX < distY {
@@ -72,10 +72,26 @@ func (l *Location) Distance(other *Location) int {
 func (l *Location) Neighbours(gs State) []Location {
 	locs := []Location{}
 	add := func(l Location) {
-		if gs.IsInside(l) {
+		if gs.IsInside(&l) {
 			locs = append(locs, l)
 		}
 	}
+	add(Location{X: l.X, Y: l.Y + 1})
+	add(Location{X: l.X, Y: l.Y - 1})
+	add(Location{X: l.X + 1, Y: l.Y})
+	add(Location{X: l.X - 1, Y: l.Y})
+	return locs
+}
+
+// Distance between points
+func (l *Location) Moves(gs State) []Location {
+	locs := []Location{}
+	add := func(l Location) {
+		if gs.CanMoveTo(&l) {
+			locs = append(locs, l)
+		}
+	}
+	add(*l)
 	add(Location{X: l.X, Y: l.Y + 1})
 	add(Location{X: l.X, Y: l.Y - 1})
 	add(Location{X: l.X + 1, Y: l.Y})
@@ -107,7 +123,7 @@ type Bomb struct {
 }
 
 func (b *Bomb) IsInRadius(l Location) bool {
-	return b.Location.Distance(l) <= b.ExplosionRadius
+	return b.Location.Distance(&l) <= b.ExplosionRadius
 }
 
 // Missile info
@@ -118,7 +134,7 @@ type Missile struct {
 }
 
 func (m *Missile) IsInRadius(l Location) bool {
-	return m.Location.Distance(l) <= m.ExplosionRadius
+	return m.Location.Distance(&l) <= m.ExplosionRadius
 }
 
 // BotMove returned to handler
