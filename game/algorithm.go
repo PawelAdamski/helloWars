@@ -19,6 +19,25 @@ type Algorithm interface {
 // Board of the game
 type Board [][]int
 
+func (b Board) Clone() Board {
+	c := make([][]int, len(b))
+	for i, row := range b {
+		c[i] = make([]int, len(row))
+		copy(c[i], row)
+	}
+	return c
+}
+
+func (b Board) OnExplosion(l *Location) {
+	t := b[l.X][l.Y]
+	switch t {
+	case Regular:
+		b[l.X][l.Y] = Empty
+	case Fortified:
+		b[l.X][l.Y] = Regular
+	}
+}
+
 // State is received each turn
 type State struct {
 	Board              Board
