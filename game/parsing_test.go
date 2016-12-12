@@ -66,14 +66,15 @@ func (s *ParsingSuite) TestParsing(c *C) {
 	state := State{}
 	err := json.Unmarshal([]byte(input), &state)
 	c.Assert(err, IsNil)
-	c.Assert(state.BotLocation, Equals, Location{x: 0, y: 0})
+	c.Assert(state.BotLocation, Equals, Location{X: 0, Y: 0})
 	expectedBomb := Bomb{
-		Location:            Location{x: 0, y: 1},
+		Location:            Location{Y: 0, X: 1},
 		ExplosionRadius:     2,
 		RoundsUntilExplodes: 3,
 	}
 	if state.GameConfig.MapHeight != 20 {
-		t.Fatalf("GameConfig.MapHeight is %d", state.GameConfig.MapHeight)
+		c.Error("GameConfig.MapHeight is %d", state.GameConfig.MapHeight)
+		c.Fail()
 	}
 	c.Assert(state.Bombs, DeepEquals, []Bomb{expectedBomb})
 	col1 := []int{2, 2, 3}
@@ -82,3 +83,5 @@ func (s *ParsingSuite) TestParsing(c *C) {
 	expectedBoard := [][]int{col1, col2, col3}
 	c.Assert(state.Board, DeepEquals, expectedBoard)
 }
+
+

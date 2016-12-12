@@ -36,8 +36,8 @@ type Config struct {
 
 // Location description
 type Location struct {
-	x int
-	y int
+	X int
+	Y int
 }
 
 // UnmarshalJSON implements json interface
@@ -47,7 +47,7 @@ func (l *Location) UnmarshalJSON(data []byte) error {
 	s = strings.Replace(s, "\"", "", -1)
 	ss := strings.Split(s, ",")
 	var err error
-	if l.x, err = strconv.Atoi(strings.TrimSpace(ss[0])); err != nil {
+	if l.X, err = strconv.Atoi(strings.TrimSpace(ss[0])); err != nil {
 		return err
 	}
 	if l.y, err = strconv.Atoi(strings.TrimSpace(ss[1])); err != nil {
