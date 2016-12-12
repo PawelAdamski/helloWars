@@ -66,9 +66,9 @@ func (s *ParsingSuite) TestParsing(c *C) {
 	state := State{}
 	err := json.Unmarshal([]byte(input), &state)
 	c.Assert(err, IsNil)
-	c.Assert(state.BotLocation, Equals, Location{x: 0, y: 0})
+	c.Assert(state.BotLocation, Equals, Location{X: 0, Y: 0})
 	expectedBomb := Bomb{
-		Location:            Location{x: 0, y: 1},
+		Location:            Location{X: 0, Y: 1},
 		ExplosionRadius:     2,
 		RoundsUntilExplodes: 3,
 	}
