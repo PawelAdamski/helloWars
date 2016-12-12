@@ -76,10 +76,10 @@ func (s *ParsingSuite) TestParsing(c *C) {
 		c.Error("GameConfig.MapHeight is %d", state.GameConfig.MapHeight)
 		c.Fail()
 	}
-	c.Assert(state.Bombs, DeepEquals, []Bomb{expectedBomb})
+	c.Assert(state.Bombs, DeepEquals, Bombs{expectedBomb})
 	col1 := []int{2, 2, 3}
 	col2 := []int{0, 0, 1}
 	col3 := []int{0, 0, 0}
-	expectedBoard := [][]int{col1, col2, col3}
+	expectedBoard := Board{col1, col2, col3}
 	c.Assert(state.Board, DeepEquals, expectedBoard)
 }

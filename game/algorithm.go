@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const directions = []Direction{
+var directions = []Direction{
 	Direction{X: 0, Y: 1},
 	Direction{X: 0, Y: -1},
 	Direction{X: 1, Y: 0},
@@ -200,6 +200,6 @@ func (a ByLocation) Less(i, j int) bool {
 	if a[i].X != a[j].X {
 		return a[i].X < a[j].X
 	} else {
-		return a[i].Y != a[j].Y
+		return a[i].Y < a[j].Y
 	}
 }

@@ -75,14 +75,15 @@ func (s *NextStateSuite) TestChainedExplosion(c *C) {
 		Location{X: 3, Y: 3},
 		Location{X: 2, Y: 3},
 		Location{X: 1, Y: 3},
+		Location{X: 0, Y: 3},
 
 		Location{X: 3, Y: 4},
 		Location{X: 2, Y: 4},
 		Location{X: 1, Y: 4},
 
-		Location{X: 3, Y: 5},
-		Location{X: 2, Y: 5},
-		Location{X: 1, Y: 5},
+		Location{X: 3, Y: 2},
+		Location{X: 2, Y: 2},
+		Location{X: 1, Y: 2},
 	}
 	sort.Sort(ByLocation(expectedExplosions))
 	sort.Sort(ByLocation(explosions))
@@ -92,7 +93,7 @@ func (s *NextStateSuite) TestChainedExplosion(c *C) {
 
 func emptyBoard(width, height int) Board {
 	b := Board{}
-	for _ := range width {
+	for i := 0; i < width; i++ {
 		b = append(b, make([]int, height))
 	}
 	return b
