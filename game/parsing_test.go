@@ -68,7 +68,7 @@ func (s *ParsingSuite) TestParsing(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(state.BotLocation, Equals, Location{X: 0, Y: 0})
 	expectedBomb := Bomb{
-		Location:            Location{Y: 0, X: 1},
+		Location:            Location{X: 0, Y: 1},
 		ExplosionRadius:     2,
 		RoundsUntilExplodes: 3,
 	}
@@ -83,5 +83,3 @@ func (s *ParsingSuite) TestParsing(c *C) {
 	expectedBoard := [][]int{col1, col2, col3}
 	c.Assert(state.Board, DeepEquals, expectedBoard)
 }
-
-
