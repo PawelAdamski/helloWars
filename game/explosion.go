@@ -18,6 +18,8 @@ func (s *State) Next() (*State, Locations) {
 				if nextState.IsEmpty(&l) {
 					explosions[l] = true
 					nextState.Bombs.findChainedExplosions(l)
+				} else {
+					break
 				}
 			}
 		}
