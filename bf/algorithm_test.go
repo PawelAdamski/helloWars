@@ -60,19 +60,18 @@ func (s *BombSafeSuite) TestIncomingExplosion(c *C) {
 }
 
 func (s *BombSafeSuite) TestAvoidableExplosion(c *C) {
-	s.testAvoidableExplosion(c, 0, false)
-	s.testAvoidableExplosion(c, 1, false)
-	s.testAvoidableExplosion(c, 2, false)
-	s.testAvoidableExplosion(c, 3, false)
-	s.testAvoidableExplosion(c, 4, true)
+	//s.testAvoidableExplosion(c, 0, false)
+	//s.testAvoidableExplosion(c, 1, false)
+	//s.testAvoidableExplosion(c, 2, false)
+	//s.testAvoidableExplosion(c, 3, false)
+	s.testAvoidableExplosion(c, 2, true)
 }
 
 func (s *BombSafeSuite) testAvoidableExplosion(c *C, roundsUntilExplodes int, avoidable bool) {
 	gs := game.State{
 		Board: [][]int{
-			{game.Empty, game.Empty, game.Empty},
-			{game.Empty, game.Empty, game.Empty},
-			{game.Empty, game.Empty, game.Empty},
+			{game.Empty, game.Empty},
+			{game.Empty, game.Empty},
 		},
 		Bombs: []game.Bomb{
 			{
@@ -83,23 +82,7 @@ func (s *BombSafeSuite) testAvoidableExplosion(c *C, roundsUntilExplodes int, av
 				},
 				ExplosionRadius: 2,
 			},
-			{
-				RoundsUntilExplodes: roundsUntilExplodes,
-				Location: game.Location{
-					X: 1,
-					Y: 0,
-				},
-				ExplosionRadius: 2,
-			},
-			{
-				RoundsUntilExplodes: roundsUntilExplodes,
-				Location: game.Location{
-					X: 0,
-					Y: 1,
-				},
-				ExplosionRadius: 2,
-			},
 		},
 	}
-	c.Assert(IsSafeFromBombs(gs, game.Location{X: 0, Y: 0}, 0, 5), Equals, avoidable)
+	c.Assert(IsSafeFromBombs(gs, game.Location{X: 0, Y: 0}, 0, 7), Equals, avoidable)
 }
