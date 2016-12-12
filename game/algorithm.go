@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-var Directions = []Direction{
-	Direction{X: 0, Y: 1},
-	Direction{X: 0, Y: -1},
-	Direction{X: 1, Y: 0},
-	Direction{X: -1, Y: 0},
+var Directions = map[int]Direction{
+	Down:    Direction{X: 0, Y: 1},
+	Up:  Direction{X: 0, Y: -1},
+	Right: Direction{X: 1, Y: 0},
+	Left:  Direction{X: -1, Y: 0},
 }
 
 type Algorithm interface {
@@ -64,6 +64,22 @@ func (s *State) CanMoveTo(l *Location) bool {
 	return s.IsInside(l) && s.IsEmpty(l)
 }
 
+func (s *State) moveMissiles() []Missile {
+	exploding := []Missile{}
+	notExploding := []Missile{}
+	for i := range s.Missiles {
+		d := Directions[s.Missiles[i].MoveDirection]
+		s.Missiles[i].Location.move(d)
+		if s.IsEmpty(&s.Missiles[i].Location) {
+			notExploding = append(notExploding, s.Missiles[i])
+		} else {
+			exploding = append(exploding, s.Missiles[i])
+		}
+	}
+	s.Missiles = notExploding
+	return exploding
+}
+
 // Config of the game
 type Config struct {
 	MapWidth                          int
@@ -90,6 +106,11 @@ func (ll Locations) Contains(lo Location) bool {
 		}
 	}
 	return false
+}
+
+func (l *Location) move(d Direction) {
+	l.X += d.X
+	l.Y += d.Y
 }
 
 type Direction Location

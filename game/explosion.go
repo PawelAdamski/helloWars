@@ -5,40 +5,54 @@ func (s *State) Next() (*State, Locations) {
 	nextState := *s
 	nextState.Bombs = append([]Bomb{}, nextState.Bombs...)
 
-	// avoid cloning if not needed
-	boardCloned := false
-	nextState.Board = s.Board.Clone()
-
 	explosions := map[Location]bool{}
-	for bi, b := nextState.Bombs.findExploding(); bi >= 0; bi, b = nextState.Bombs.findExploding() {
-		nextState.Bombs = append(
-			append([]Bomb{}, nextState.Bombs[:bi]...),
-			nextState.Bombs[bi+1:]...)
+	explodingMissiles := nextState.moveMissiles()
+	damagedWalls := []Location{}
+	for {
+		anyExplosion := false
+		explosionLocation := Location{}
+		explosionRadius := 0
+		bi, b := nextState.Bombs.findExploding()
+		if bi >= 0 {
+			nextState.Bombs = append(nextState.Bombs[:bi], nextState.Bombs[bi+1:]...)
+			anyExplosion = true
+			explosionLocation = b.Location
+			explosionRadius = b.ExplosionRadius
+		}
+		if !anyExplosion && len(explodingMissiles) > 0 {
+			anyExplosion = true
+			explosionLocation = explodingMissiles[0].Location
+			explosionRadius = explodingMissiles[0].ExplosionRadius
+			explodingMissiles = explodingMissiles[1:]
+		}
+		if !anyExplosion {
+			nextState.Bombs.decreaseCounters()
+			return &nextState, toLocationSlice(explosions)
+		}
 		for _, d := range Directions {
-			l := b.Location
+			l := explosionLocation
 			explosions[l] = true
-			for i := 0; i < b.ExplosionRadius; i++ {
-				l.X += d.X
-				l.Y += d.Y
+			for i := 0; i < explosionRadius; i++ {
+				l.move(d)
 				if nextState.IsInside(&l) {
 					if nextState.IsEmpty(&l) {
 						explosions[l] = true
 						nextState.Bombs.findChainedExplosions(l)
 					} else {
-						if !boardCloned {
-							nextState.Board = s.Board.Clone()
-							boardCloned = true
-						}
-						nextState.Board.OnExplosion(&l)
+						damagedWalls = append(damagedWalls, l)
 						break
 					}
 				}
 			}
 		}
-		bi, b = nextState.Bombs.findExploding()
 	}
-	nextState.Bombs.decreaseCounters()
-	return &nextState, toLocationSlice(explosions)
+	if len(damagedWalls) > 0 {
+		nextState.Board = s.Board.Clone()
+		for _, w := range damagedWalls {
+			s.Board.OnExplosion(&w)
+		}
+	}
+	return nil, []Location{}
 }
 
 func toLocationSlice(set map[Location]bool) Locations {
