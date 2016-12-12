@@ -1,10 +1,6 @@
 package bf
 
-import (
-	"fmt"
-
-	"github.com/PawelAdamski/helloWars/game"
-)
+import "github.com/PawelAdamski/helloWars/game"
 
 // OutcomeType of move
 type OutcomeType float64
@@ -14,6 +10,53 @@ const (
 	PlayerUnsafe OutcomeType = -0.5
 	OpponentDead OutcomeType = 1
 )
+
+type BotMove struct {
+	Direction game.Direction
+	Action    int
+}
+
+func Moves(gs *game.State, loc game.Location, bombsExplodeIn int) []BotMove {
+	gsWithBombs := *gs
+	gsWithBombs.Bombs = append([]game.Bomb{}, gs.Bombs...)
+	gsWithBombs.Bombs = append(gsWithBombs.Bombs, game.Bomb{
+		Location:            loc,
+		ExplosionRadius:     gs.GameConfig.BombBlastRadius,
+		RoundsUntilExplodes: bombsExplodeIn,
+	})
+
+	dirs := directions(&gsWithBombs, loc)
+	if len(dirs) > 0 {
+		return directionsToMoves(dirs, game.DropBomb)
+	}
+	return directionsToMoves(directions(gs, loc), game.None)
+}
+
+func directionsToMoves(dirs []game.Direction, action int) []BotMove {
+	mvs := []BotMove{}
+	for _, dir := range dirs {
+		mvs = append(mvs, BotMove{
+			Direction: dir,
+			Action:    action,
+		})
+	}
+	return mvs
+}
+
+func directions(gs *game.State, loc game.Location) []game.Direction {
+	const depth = 6
+	directions := []game.Direction{}
+	nextGS, locs := gs.Next()
+	if locs.Contains(loc) {
+		return directions
+	}
+	for dir, move := range loc.Moves(gs) {
+		if IsSafeFromBombs(nextGS, move, depth) {
+			directions = append(directions, dir)
+		}
+	}
+	return directions
+}
 
 func IsSafeFromBombs(gs *game.State, loc game.Location, depth int) bool {
 	nextGS, locs := gs.Next()
@@ -30,23 +73,3 @@ func IsSafeFromBombs(gs *game.State, loc game.Location, depth int) bool {
 	}
 	return true
 }
-
-func isBombThreat(gs game.State, loc game.Location, time int) bool {
-	for _, bomb := range gs.Bombs {
-		if bomb.RoundsUntilExplodes == time && bomb.IsInRadius(loc) {
-			fmt.Println("B", bomb.Location.X, bomb.Location.Y, time)
-			return true
-		}
-	}
-	return false
-}
-
-//
-//func isMissileThreat(gs game.State, loc game.Location) bool {
-//	for _, m := range gs.Missiles {
-//		if !gs.IsEmpty(m.Location) && m.IsInRadius(loc) {
-//			return true
-//		}
-//	}
-//	return false
-//}

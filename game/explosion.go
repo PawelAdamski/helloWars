@@ -14,7 +14,7 @@ func (s *State) Next() (*State, Locations) {
 		nextState.Bombs = append(
 			append([]Bomb{}, nextState.Bombs[:bi]...),
 			nextState.Bombs[bi+1:]...)
-		for _, d := range directions {
+		for _, d := range Directions {
 			l := b.Location
 			explosions[l] = true
 			for i := 0; i < b.ExplosionRadius; i++ {

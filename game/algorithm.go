@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var directions = []Direction{
+var Directions = []Direction{
 	Direction{X: 0, Y: 1},
 	Direction{X: 0, Y: -1},
 	Direction{X: 1, Y: 0},
@@ -125,20 +125,28 @@ func (l *Location) Neighbours(gs State) []Location {
 	return locs
 }
 
+func (l Location) Translate(d Direction) Location {
+	return Location{
+		X: l.X + d.X,
+		Y: l.Y + d.Y,
+	}
+}
+
 // Distance between points
-func (l *Location) Moves(gs *State) []Location {
-	locs := []Location{}
-	add := func(l Location) {
-		if gs.CanMoveTo(&l) {
-			locs = append(locs, l)
+func (l *Location) Moves(gs *State) map[Direction]Location {
+	dirLoc := map[Direction]Location{}
+	add := func(d Direction) {
+		t := l.Translate(d)
+		if gs.CanMoveTo(&t) {
+			dirLoc[d] = t
 		}
 	}
-	add(*l)
-	add(Location{X: l.X, Y: l.Y + 1})
-	add(Location{X: l.X, Y: l.Y - 1})
-	add(Location{X: l.X + 1, Y: l.Y})
-	add(Location{X: l.X - 1, Y: l.Y})
-	return locs
+	add(Direction{X: 0, Y: 0})
+	add(Direction{X: 1, Y: 0})
+	add(Direction{X: -1, Y: 0})
+	add(Direction{X: 0, Y: 1})
+	add(Direction{X: 0, Y: -1})
+	return dirLoc
 }
 
 // UnmarshalJSON implements json interface
