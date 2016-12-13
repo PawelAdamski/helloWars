@@ -1,6 +1,10 @@
 package bf
 
-import "github.com/PawelAdamski/helloWars/game"
+import (
+	"math/rand"
+
+	"github.com/PawelAdamski/helloWars/game"
+)
 
 // OutcomeType of move
 type OutcomeType float64
@@ -11,12 +15,24 @@ const (
 	OpponentDead OutcomeType = 1
 )
 
-type BotMove struct {
+type botMove struct {
 	Direction game.Direction
 	Action    int
 }
 
-func Moves(gs *game.State, loc game.Location, bombsExplodeIn int) []BotMove {
+func NextMove(s *game.State) game.BotMove {
+	moves := safeMoves(s, s.BotLocation, 5)
+	if len(moves) == 0 {
+		return game.BotMove{}
+	}
+	m := moves[rand.Intn(len(moves))]
+	return game.BotMove{
+		Action:    m.Action,
+		Direction: m.Direction.AsResponse(),
+	}
+}
+
+func safeMoves(gs *game.State, loc game.Location, bombsExplodeIn int) []botMove {
 	gsWithBombs := *gs
 	gsWithBombs.Bombs = append([]game.Bomb{}, gs.Bombs...)
 	gsWithBombs.Bombs = append(gsWithBombs.Bombs, game.Bomb{
@@ -32,10 +48,10 @@ func Moves(gs *game.State, loc game.Location, bombsExplodeIn int) []BotMove {
 	return directionsToMoves(directions(gs, loc), game.None)
 }
 
-func directionsToMoves(dirs []game.Direction, action int) []BotMove {
-	mvs := []BotMove{}
+func directionsToMoves(dirs []game.Direction, action int) []botMove {
+	mvs := []botMove{}
 	for _, dir := range dirs {
-		mvs = append(mvs, BotMove{
+		mvs = append(mvs, botMove{
 			Direction: dir,
 			Action:    action,
 		})
@@ -46,12 +62,8 @@ func directionsToMoves(dirs []game.Direction, action int) []BotMove {
 func directions(gs *game.State, loc game.Location) []game.Direction {
 	const depth = 6
 	directions := []game.Direction{}
-	nextGS, locs := gs.Next()
-	if locs.Contains(loc) {
-		return directions
-	}
 	for dir, move := range loc.Moves(gs) {
-		if IsSafeFromBombs(nextGS, move, depth) {
+		if IsSafeFromBombs(gs, move, depth) {
 			directions = append(directions, dir)
 		}
 	}

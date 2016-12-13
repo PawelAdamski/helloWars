@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -11,6 +12,8 @@ var Directions = map[int]Direction{
 	Right: Direction{X: 1, Y: 0},
 	Left:  Direction{X: -1, Y: 0},
 }
+
+var inverseDirections = map[Direction]int{}
 
 type Algorithm interface {
 	nextAction(State) BotMove
@@ -44,6 +47,7 @@ func (b Board) OnExplosion(l *Location) {
 // State is received each turn
 type State struct {
 	Board              Board
+	BotID              string `json:"BotId"`
 	BotLocation        Location
 	IsMissileAvailable bool
 	OpponentLocations  []Location
@@ -117,6 +121,14 @@ func (l *Location) move(d Direction) {
 }
 
 type Direction Location
+
+func (d *Direction) AsResponse() *int {
+	i, ok := inverseDirections[*d]
+	if !ok {
+		return nil
+	}
+	return &i
+}
 
 // Distance between points
 func (l *Location) Distance(other *Location) int {
@@ -238,9 +250,21 @@ func (m *Missile) IsInRadius(l Location) bool {
 
 // BotMove returned to handler
 type BotMove struct {
-	Direction     int
+	Direction     *int
 	Action        int
 	FireDirection int
+}
+
+func (bm *BotMove) String() string {
+	direction := "stay"
+	d := Direction{}
+	if bm.Direction != nil {
+		direction = fmt.Sprint(*bm.Direction)
+		d = Directions[*bm.Direction]
+	}
+	return fmt.Sprintf("Direction: %s (%v), action: %v, fire: %d",
+		direction, d, bm.Action, bm.FireDirection)
+
 }
 
 const Up = 0

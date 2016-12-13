@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/PawelAdamski/helloWars/bf"
 	"github.com/PawelAdamski/helloWars/game"
 )
 
@@ -19,13 +20,11 @@ func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Can't unmarshal", err, string(bb))
 	}
-	nm := game.BotMove{
-		Direction: game.Up,
-		Action:    game.None,
-	}
+	nm := bf.NextMove(&gs)
 	bb, err = json.Marshal(nm)
 	if err != nil {
 		fmt.Println("Can't marshall BotMove")
 	}
+	fmt.Println(gs.BotID, gs.BotLocation, nm.String())
 	fmt.Fprint(w, string(bb))
 }
