@@ -6,8 +6,8 @@ import (
 )
 
 var Directions = map[int]Direction{
-	Down:    Direction{X: 0, Y: 1},
-	Up:  Direction{X: 0, Y: -1},
+	Down:  Direction{X: 0, Y: 1},
+	Up:    Direction{X: 0, Y: -1},
 	Right: Direction{X: 1, Y: 0},
 	Left:  Direction{X: -1, Y: 0},
 }
@@ -19,11 +19,14 @@ type Algorithm interface {
 // Board of the game
 type Board [][]int
 
-func (b Board) Clone() Board {
+func (b Board) AfterExplosions(damagedWalls []Location) Board {
 	c := make([][]int, len(b))
 	for i, row := range b {
 		c[i] = make([]int, len(row))
 		copy(c[i], row)
+	}
+	for _, w := range damagedWalls {
+		b.OnExplosion(&w)
 	}
 	return c
 }
@@ -207,7 +210,7 @@ func (bs Bombs) decreaseCounters() {
 
 func (bs Bombs) findExploding() (int, Bomb) {
 	for i, b := range bs {
-		if b.RoundsUntilExplodes == 1 {
+		if b.RoundsUntilExplodes == 0 {
 			return i, b
 		}
 	}
@@ -217,7 +220,7 @@ func (bs Bombs) findExploding() (int, Bomb) {
 func (bs Bombs) findChainedExplosions(l Location) {
 	for i := range bs {
 		if bs[i].Location == l {
-			bs[i].RoundsUntilExplodes = 1
+			bs[i].RoundsUntilExplodes = 0
 		}
 	}
 }

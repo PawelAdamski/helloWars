@@ -1,38 +1,38 @@
 package game
 
+type explosionT struct {
+	location Location
+	radius   int
+}
+
 func (s *State) Next() (*State, Locations) {
 
 	nextState := *s
 	nextState.Bombs = append([]Bomb{}, nextState.Bombs...)
+	nextState.Missiles = append([]Missile{}, nextState.Missiles...)
 
 	explosions := map[Location]bool{}
 	explodingMissiles := nextState.moveMissiles()
+	nextState.Bombs.decreaseCounters()
 	damagedWalls := []Location{}
 	for {
-		anyExplosion := false
-		explosionLocation := Location{}
-		explosionRadius := 0
-		bi, b := nextState.Bombs.findExploding()
-		if bi >= 0 {
+		var explosion *explosionT
+		if bi, b := nextState.Bombs.findExploding(); bi >= 0 {
 			nextState.Bombs = append(nextState.Bombs[:bi], nextState.Bombs[bi+1:]...)
-			anyExplosion = true
-			explosionLocation = b.Location
-			explosionRadius = b.ExplosionRadius
+			explosion = &explosionT{location: b.Location, radius: b.ExplosionRadius}
 		}
-		if !anyExplosion && len(explodingMissiles) > 0 {
-			anyExplosion = true
-			explosionLocation = explodingMissiles[0].Location
-			explosionRadius = explodingMissiles[0].ExplosionRadius
+		if explosion == nil && len(explodingMissiles) > 0 {
+			m := explodingMissiles[0]
+			explosion = &explosionT{location: m.Location, radius: m.ExplosionRadius}
 			explodingMissiles = explodingMissiles[1:]
 		}
-		if !anyExplosion {
-			nextState.Bombs.decreaseCounters()
+		if explosion == nil {
 			return &nextState, toLocationSlice(explosions)
 		}
 		for _, d := range Directions {
-			l := explosionLocation
+			l := explosion.location
 			explosions[l] = true
-			for i := 0; i < explosionRadius; i++ {
+			for i := 0; i < explosion.radius; i++ {
 				l.move(d)
 				if nextState.IsInside(&l) {
 					if nextState.IsEmpty(&l) {
@@ -47,10 +47,7 @@ func (s *State) Next() (*State, Locations) {
 		}
 	}
 	if len(damagedWalls) > 0 {
-		nextState.Board = s.Board.Clone()
-		for _, w := range damagedWalls {
-			s.Board.OnExplosion(&w)
-		}
+		nextState.Board = s.Board.AfterExplosions(damagedWalls)
 	}
 	return nil, []Location{}
 }
