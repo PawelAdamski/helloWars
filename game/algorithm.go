@@ -48,7 +48,7 @@ type State struct {
 	IsMissileAvailable bool
 	OpponentLocations  []Location
 	Bombs              Bombs
-	Missiles           []Missile
+	Missiles           Missiles
 	GameConfig         Config
 }
 
@@ -67,20 +67,14 @@ func (s *State) CanMoveTo(l *Location) bool {
 	return s.IsInside(l) && s.IsEmpty(l)
 }
 
-func (s *State) moveMissiles() []Missile {
-	exploding := []Missile{}
-	notExploding := []Missile{}
+func (s *State) moveMissiles() {
 	for i := range s.Missiles {
 		d := Directions[s.Missiles[i].MoveDirection]
 		s.Missiles[i].Location.move(d)
-		if s.IsEmpty(&s.Missiles[i].Location) {
-			notExploding = append(notExploding, s.Missiles[i])
-		} else {
-			exploding = append(exploding, s.Missiles[i])
+		if !s.IsEmpty(&s.Missiles[i].Location) {
+			s.Missiles[i].hasExploded = true
 		}
 	}
-	s.Missiles = notExploding
-	return exploding
 }
 
 // Config of the game
@@ -92,6 +86,12 @@ type Config struct {
 	RoundsBetweenMissiles             int
 	RoundsBeforeIncreasingBlastRadius int
 	IsFastMissileModeEnabled          bool
+}
+
+func joinLocationSet(dest, src map[Location]bool) {
+	for l := range src {
+		dest[l] = true
+	}
 }
 
 // Location description
@@ -230,10 +230,30 @@ type Missile struct {
 	MoveDirection   int
 	Location        Location
 	ExplosionRadius int
+	hasExploded     bool
 }
 
 func (m *Missile) IsInRadius(l Location) bool {
 	return m.Location.Distance(&l) <= m.ExplosionRadius
+}
+
+type Missiles []Missile
+
+func (ms Missiles) findExploding() (int, Missile) {
+	for i, m := range ms {
+		if m.hasExploded {
+			return i, m
+		}
+	}
+	return -1, Missile{}
+}
+
+func (ms Missiles) findChainedExplosions(l Location) {
+	for i := range ms {
+		if ms[i].Location == l {
+			ms[i].hasExploded = true
+		}
+	}
 }
 
 // BotMove returned to handler
