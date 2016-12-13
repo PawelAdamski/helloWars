@@ -75,9 +75,18 @@ func (s *State) CanMoveTo(l *Location) bool {
 func (s *State) moveMissiles() {
 	for i := range s.Missiles {
 		d := Directions[s.Missiles[i].MoveDirection]
-		s.Missiles[i].Location.move(d)
-		if !s.IsEmpty(&s.Missiles[i].Location) {
+		nextLocation := s.Missiles[i].Location
+		nextLocation.move(d)
+		if !s.IsEmpty(&nextLocation) {
 			s.Missiles[i].hasExploded = true
+		} else {
+			s.Missiles[i].Location = nextLocation
+		}
+		if s.GameConfig.IsFastMissileModeEnabled {
+			nextLocation.move(d)
+			if !s.IsEmpty(&nextLocation) {
+				s.Missiles[i].hasExploded = true
+			}
 		}
 	}
 }
