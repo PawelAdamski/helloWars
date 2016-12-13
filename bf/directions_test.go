@@ -75,7 +75,7 @@ func (s *BombSafeSuite) TestRunsForCover3(c *C) {
 	}
 	dirs := directions(&gs, game.Location{X: 1, Y: 0})
 	c.Assert(dirs, HasLen, 1)
-	c.Assert(dirs[0], Equals, game.Direction{X: -1, Y: 0})
+	c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
 }
 
 func (s *BombSafeSuite) TestTriesToSetBombs(c *C) {

@@ -3,9 +3,23 @@ package bf
 import (
 	"testing"
 
+	"math"
+
 	"github.com/PawelAdamski/helloWars/game"
 	. "gopkg.in/check.v1"
 )
+
+func assertAvoidable(s int, avoidable bool, c *C) {
+	if avoidable {
+		if s == 0 {
+			c.Fatalf("Expected avoidable, got %d", s)
+		}
+	} else {
+		if s != 0 {
+			c.Fatalf("Expected not avoidable, got %d", s)
+		}
+	}
+}
 
 func Test(t *testing.T) { TestingT(t) }
 
@@ -30,7 +44,7 @@ func (s *BombSafeSuite) TestSimpleCase(c *C) {
 			},
 		},
 	}
-	c.Assert(IsSafeFromBombs(&gs, game.Location{X: 0, Y: 1}, 0), Equals, false)
+	c.Assert(safety(&gs, game.Location{X: 0, Y: 1}, 0), Equals, 0)
 }
 
 func (s *BombSafeSuite) TestIncomingExplosion(c *C) {
@@ -58,9 +72,9 @@ func (s *BombSafeSuite) TestIncomingExplosion(c *C) {
 			},
 		},
 	}
-	c.Assert(IsSafeFromBombs(gs, game.Location{X: 0, Y: 0}, 0), Equals, true)
-	c.Assert(IsSafeFromBombs(gs, game.Location{X: 0, Y: 0}, 1), Equals, true)
-	c.Assert(IsSafeFromBombs(gs, game.Location{X: 0, Y: 0}, 2), Equals, false)
+	c.Assert(safety(gs, game.Location{X: 0, Y: 0}, 0), Equals, math.MaxInt32)
+	c.Assert(safety(gs, game.Location{X: 0, Y: 0}, 1), Equals, math.MaxInt32)
+	c.Assert(safety(gs, game.Location{X: 0, Y: 0}, 2), Equals, 0)
 }
 
 func (s *BombSafeSuite) TestAvoidableExplosion(c *C) {
@@ -86,7 +100,7 @@ func (s *BombSafeSuite) testAvoidableExplosion(c *C, roundsUntilExplodes int, av
 			},
 		},
 	}
-	c.Assert(IsSafeFromBombs(&gs, game.Location{X: 0, Y: 0}, 7), Equals, avoidable)
+	assertAvoidable(safety(&gs, game.Location{X: 0, Y: 0}, 7), avoidable, c)
 }
 
 func (s *BombSafeSuite) TestCanHideFromExplosion(c *C) {
@@ -115,5 +129,5 @@ func (s *BombSafeSuite) TestCanHideFromExplosion(c *C) {
 			},
 		},
 	}
-	c.Assert(IsSafeFromBombs(&gs, game.Location{X: 0, Y: 0}, 7), Equals, true)
+	assertAvoidable(safety(&gs, game.Location{X: 0, Y: 0}, 7), true, c)
 }

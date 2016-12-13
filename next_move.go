@@ -25,6 +25,5 @@ func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Can't marshall BotMove")
 	}
-	fmt.Println(gs.BotID, gs.BotLocation, nm.String())
 	fmt.Fprint(w, string(bb))
 }

@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -115,6 +116,17 @@ func (ll Locations) Contains(lo Location) bool {
 	return false
 }
 
+func (ll Locations) MinDistance(lo Location) int {
+	m := math.MaxInt32
+	for _, l := range ll {
+		d := l.Distance(&lo)
+		if m > d {
+			m = d
+		}
+	}
+	return m
+}
+
 func (l *Location) move(d Direction) {
 	l.X += d.X
 	l.Y += d.Y
@@ -140,10 +152,7 @@ func (l *Location) Distance(other *Location) int {
 	if distY < 0 {
 		distY = -distY
 	}
-	if distX < distY {
-		return distX
-	}
-	return distY
+	return distY + distX
 }
 
 // Distance between points
