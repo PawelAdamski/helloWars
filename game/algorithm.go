@@ -77,18 +77,24 @@ func (s *State) moveMissiles() {
 		d := Directions[s.Missiles[i].MoveDirection]
 		nextLocation := s.Missiles[i].Location
 		nextLocation.move(d)
-		if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) {
+		if s.collision(nextLocation) {
 			s.Missiles[i].hasExploded = true
 		} else {
 			s.Missiles[i].Location = nextLocation
 		}
 		if s.GameConfig.IsFastMissileModeEnabled {
 			nextLocation.move(d)
-			if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) {
+			if s.collision(nextLocation) {
 				s.Missiles[i].hasExploded = true
 			}
 		}
 	}
+}
+
+func (s *State) collision(l Location) bool {
+	return !s.IsEmpty(&l) ||
+		!s.IsInside(&l) ||
+		s.Bombs.contains(l)
 }
 
 // Config of the game
@@ -253,6 +259,15 @@ func (bs Bombs) findChainedExplosions(l Location) {
 			bs[i].RoundsUntilExplodes = 0
 		}
 	}
+}
+
+func (bs Bombs) contains(l Location) bool {
+	for _, b := range bs {
+		if b.Location == l {
+			return true
+		}
+	}
+	return false
 }
 
 // Missile info

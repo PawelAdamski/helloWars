@@ -39,7 +39,7 @@ func (s *State) Next() (*State, Locations) {
 	return nil, []Location{}
 }
 
-func (s *State) explode(e *explosionT) ( map[Location]bool, []Location) {
+func (s *State) explode(e *explosionT) (map[Location]bool, []Location) {
 	explosions := map[Location]bool{}
 	damagedWalls := []Location{}
 	for _, d := range Directions {
@@ -48,8 +48,8 @@ func (s *State) explode(e *explosionT) ( map[Location]bool, []Location) {
 		for i := 0; i < e.radius; i++ {
 			l.move(d)
 			if s.IsInside(&l) {
+				explosions[l] = true
 				if s.IsEmpty(&l) {
-					explosions[l] = true
 					s.Bombs.findChainedExplosions(l)
 					s.Missiles.findChainedExplosions(l)
 				} else {

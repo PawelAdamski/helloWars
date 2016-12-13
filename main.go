@@ -11,7 +11,10 @@ func main() {
 	http.HandleFunc("/PerformNextMove", performNextMoveHandler)
 	http.HandleFunc("/Info", infoHandler)
 
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Errorf("Error: ", err)
+	}
 }
 
 type server struct{}
