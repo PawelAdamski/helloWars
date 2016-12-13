@@ -77,14 +77,14 @@ func (s *State) moveMissiles() {
 		d := Directions[s.Missiles[i].MoveDirection]
 		nextLocation := s.Missiles[i].Location
 		nextLocation.move(d)
-		if !s.IsEmpty(&nextLocation) {
+		if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) {
 			s.Missiles[i].hasExploded = true
 		} else {
 			s.Missiles[i].Location = nextLocation
 		}
 		if s.GameConfig.IsFastMissileModeEnabled {
 			nextLocation.move(d)
-			if !s.IsEmpty(&nextLocation) {
+			if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) {
 				s.Missiles[i].hasExploded = true
 			}
 		}
