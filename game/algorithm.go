@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -11,6 +13,8 @@ var Directions = map[int]Direction{
 	Right: Direction{X: 1, Y: 0},
 	Left:  Direction{X: -1, Y: 0},
 }
+
+var inverseDirections = map[Direction]int{}
 
 type Algorithm interface {
 	nextAction(State) BotMove
@@ -44,6 +48,7 @@ func (b Board) OnExplosion(l *Location) {
 // State is received each turn
 type State struct {
 	Board              Board
+	BotID              string `json:"BotId"`
 	BotLocation        Location
 	IsMissileAvailable bool
 	OpponentLocations  []Location
@@ -111,12 +116,31 @@ func (ll Locations) Contains(lo Location) bool {
 	return false
 }
 
+func (ll Locations) MinDistance(lo Location) int {
+	m := math.MaxInt32
+	for _, l := range ll {
+		d := l.Distance(&lo)
+		if m > d {
+			m = d
+		}
+	}
+	return m
+}
+
 func (l *Location) move(d Direction) {
 	l.X += d.X
 	l.Y += d.Y
 }
 
 type Direction Location
+
+func (d *Direction) AsResponse() *int {
+	i, ok := inverseDirections[*d]
+	if !ok {
+		return nil
+	}
+	return &i
+}
 
 // Distance between points
 func (l *Location) Distance(other *Location) int {
@@ -128,10 +152,7 @@ func (l *Location) Distance(other *Location) int {
 	if distY < 0 {
 		distY = -distY
 	}
-	if distX < distY {
-		return distX
-	}
-	return distY
+	return distY + distX
 }
 
 // Distance between points
@@ -258,9 +279,21 @@ func (ms Missiles) findChainedExplosions(l Location) {
 
 // BotMove returned to handler
 type BotMove struct {
-	Direction     int
+	Direction     *int
 	Action        int
 	FireDirection int
+}
+
+func (bm *BotMove) String() string {
+	direction := "stay"
+	d := Direction{}
+	if bm.Direction != nil {
+		direction = fmt.Sprint(*bm.Direction)
+		d = Directions[*bm.Direction]
+	}
+	return fmt.Sprintf("Direction: %s (%v), action: %v, fire: %d",
+		direction, d, bm.Action, bm.FireDirection)
+
 }
 
 const Up = 0
