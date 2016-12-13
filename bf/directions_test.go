@@ -99,9 +99,9 @@ func (s *BombSafeSuite) TestTriesToSetBombs(c *C) {
 			BombBlastRadius: 10,
 		},
 	}
-	moves := safeMoves(&gs, game.Location{X: 1, Y: 0}, 5)
+	moves := directions(&gs, game.Location{X: 1, Y: 0})
 	c.Assert(moves, HasLen, 1)
-	c.Assert(moves[0].Action, Equals, game.DropBomb)
+	c.Assert(moves[0].canDropBomb, Equals, true)
 }
 
 func (s *BombSafeSuite) TestSettingBombUnsafe(c *C) {
@@ -125,8 +125,8 @@ func (s *BombSafeSuite) TestSettingBombUnsafe(c *C) {
 			BombBlastRadius: 10,
 		},
 	}
-	moves := safeMoves(&gs, game.Location{X: 0, Y: 0}, 2)
+	moves := directions(&gs, game.Location{X: 0, Y: 0})
 	c.Assert(moves, HasLen, 1)
-	c.Assert(moves[0].Direction, Equals, game.Direction{X: 1, Y: 0})
-	c.Assert(moves[0].Action, Equals, game.None)
+	c.Assert(moves[0].direction, Equals, game.Direction{X: 1, Y: 0})
+	c.Assert(moves[0].canDropBomb, Equals, false)
 }
