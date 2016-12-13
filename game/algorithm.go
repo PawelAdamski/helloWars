@@ -77,7 +77,7 @@ func (s *State) moveMissiles() {
 		d := Directions[s.Missiles[i].MoveDirection]
 		nextLocation := s.Missiles[i].Location
 		nextLocation.move(d)
-		if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) {
+		if !s.IsEmpty(&nextLocation) || !s.IsInside(&nextLocation) || s.isBotLocation(&nextLocation) {
 			s.Missiles[i].hasExploded = true
 		} else {
 			s.Missiles[i].Location = nextLocation
@@ -89,6 +89,13 @@ func (s *State) moveMissiles() {
 			}
 		}
 	}
+}
+
+func (s *State) isBotLocation(l Location) bool {
+	if s.BotLocation == l {
+		return true
+	}
+	return Locations(s.OpponentLocations).Contains(l)
 }
 
 // Config of the game

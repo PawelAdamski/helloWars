@@ -1,7 +1,6 @@
 package bf
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/PawelAdamski/helloWars/game"
@@ -51,7 +50,6 @@ func NextMove(s *game.State) game.BotMove {
 	for _, dir := range dirs {
 		for _, a := range dir.actions {
 			for _, o := range s.OpponentLocations {
-				fmt.Println(dir.direction, a.action)
 				if a.action != game.None && !isSafe(a.state, o, &s.BotLocation, shortSearch) {
 					return a.toMove()
 				}
