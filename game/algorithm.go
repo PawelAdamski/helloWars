@@ -102,6 +102,7 @@ func (s *State) collision(l Location) bool {
 	return !s.IsEmpty(&l) ||
 		!s.IsInside(&l) ||
 		s.Bombs.contains(l) ||
+		s.isBotLocation(l) ||
 		s.isBotLocation(l)
 }
 
