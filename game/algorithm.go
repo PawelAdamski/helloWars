@@ -91,10 +91,18 @@ func (s *State) moveMissiles() {
 	}
 }
 
+func (s *State) isBotLocation(l Location) bool {
+	if s.BotLocation == l {
+		return true
+	}
+	return Locations(s.OpponentLocations).Contains(l)
+}
+
 func (s *State) collision(l Location) bool {
 	return !s.IsEmpty(&l) ||
 		!s.IsInside(&l) ||
-		s.Bombs.contains(l)
+		s.Bombs.contains(l) ||
+		s.isBotLocation(l)
 }
 
 // Config of the game

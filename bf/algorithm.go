@@ -1,14 +1,18 @@
 package bf
 
 import (
-	"math"
+	"math/rand"
 
 	"github.com/PawelAdamski/helloWars/game"
 )
 
+const maxDepth = 6
+
 type direction struct {
-	direction game.Direction
-	safety    int
+	direction   game.Direction
+	canDropBomb bool
+	missiles    []game.Direction
+	actions     []action
 }
 
 // OutcomeType of move
@@ -20,110 +24,115 @@ const (
 )
 
 type botMove struct {
-	Direction game.Direction
-	Action    int
-	Safety    int
+	Direction        game.Direction
+	Action           int
+	Safety           int
+	MissileDirection int
 }
 
-func maxSafety(bms []botMove) int {
-	maxSafety := 0
-	for _, bm := range bms {
-		if maxSafety < bm.Safety {
-			maxSafety = bm.Safety
-		}
-	}
-	return maxSafety
+var longSearch = depth{
+	me:       7,
+	opponent: 3,
+}
+
+var shortSearch = depth{
+	me:       6,
+	opponent: 2,
 }
 
 func NextMove(s *game.State) game.BotMove {
-	const bombsExplodeIn = 5
-	moves := safeMoves(s, s.BotLocation, bombsExplodeIn)
-	if len(moves) == 0 {
+	dirs := directions(s, s.BotLocation)
+	if len(dirs) == 0 {
 		return game.BotMove{}
 	}
-	safetyMin := math.MaxInt32
-	argMin := botMove{}
-	for _, move := range moves {
-		for _, opponent := range s.OpponentLocations {
-			bombInNewPlace := stateWithBomb(s, s.BotLocation.Translate(move.Direction), bombsExplodeIn+1)
-			opponentMoves := safeMoves(bombInNewPlace, opponent, 1)
-			opponentSafety := maxSafety(opponentMoves)
-			if opponentSafety < safetyMin {
-				safetyMin = opponentSafety
-				argMin = move
-			}
-		}
-	}
-
-	return game.BotMove{
-		Action:    argMin.Action,
-		Direction: argMin.Direction.AsResponse(),
-	}
-}
-
-func stateWithBomb(gs *game.State, loc game.Location, bombsExplodeIn int) *game.State {
-	gsWithBombs := *gs
-	gsWithBombs.Bombs = append([]game.Bomb{}, gs.Bombs...)
-	gsWithBombs.Bombs = append(gsWithBombs.Bombs, game.Bomb{
-		Location:            loc,
-		ExplosionRadius:     gs.GameConfig.BombBlastRadius,
-		RoundsUntilExplodes: bombsExplodeIn,
-	})
-	return &gsWithBombs
-}
-
-func safeMoves(gs *game.State, loc game.Location, bombsExplodeIn int) []botMove {
-	gsWithBombs := stateWithBomb(gs, loc, bombsExplodeIn)
-	dirs := directions(gsWithBombs, loc)
-	if len(dirs) > 0 {
-		return directionsToMoves(dirs, game.DropBomb)
-	}
-	return directionsToMoves(directions(gs, loc), game.None)
-}
-
-func directionsToMoves(dirs []direction, action int) []botMove {
-	mvs := []botMove{}
+	r := 0.0
+	argRand := game.BotMove{}
 	for _, dir := range dirs {
-		mvs = append(mvs, botMove{
-			Direction: dir.direction,
-			Action:    action,
-			Safety:    dir.safety,
-		})
-	}
-	return mvs
-}
-
-func directions(gs *game.State, loc game.Location) []direction {
-	const depth = 6
-	directions := []direction{}
-	for dir, move := range loc.Moves(gs) {
-		if s := safety(gs, move, depth); s > 0 {
-			directions = append(directions, direction{
-				direction: dir,
-				safety:    s,
-			})
-		}
-	}
-	return directions
-}
-
-func safety(gs *game.State, loc game.Location, depth int) int {
-	nextGS, locs := gs.Next()
-	explosionsSafety := locs.MinDistance(loc)
-	if explosionsSafety == 0 {
-		return explosionsSafety
-	}
-	if depth > 0 {
-		recursiveSafety := 0
-		for _, move := range loc.Moves(gs) {
-			if s := safety(nextGS, move, depth-1); s > recursiveSafety {
-				recursiveSafety = s
+		for _, a := range dir.actions {
+			for _, o := range s.OpponentLocations {
+				if a.action != game.None && !isSafe(a.state, o, &s.BotLocation, shortSearch) {
+					return a.toMove()
+				}
+				if f := rand.Float64(); r < f {
+					r = f
+					argRand = a.toMove()
+				}
 			}
 		}
-		if explosionsSafety < recursiveSafety {
-			return explosionsSafety
-		}
-		return recursiveSafety
 	}
-	return explosionsSafety
+	return argRand
+}
+
+func directions(gs *game.State, me game.Location) []direction {
+	dirMap := map[game.Direction]*direction{}
+	for _, a := range actions(me, gs, true) {
+		if isSafeAgainstAll(a.state, a.nextLocation, gs.OpponentLocations) {
+			if _, ok := dirMap[a.direction]; !ok {
+				dirMap[a.direction] = &direction{
+					direction:   a.direction,
+					canDropBomb: false,
+				}
+			}
+			dirMap[a.direction].actions = append(dirMap[a.direction].actions, a)
+			if a.action == game.DropBomb {
+				dirMap[a.direction].canDropBomb = true
+			} else if a.action == game.FireMissile {
+				dirMap[a.direction].missiles = append(
+					dirMap[a.direction].missiles,
+					a.missile)
+			}
+		}
+	}
+	dirs := []direction{}
+	for _, d := range dirMap {
+		dirs = append(dirs, *d)
+	}
+	return dirs
+}
+
+func isSafeAgainstAll(gs *game.State, me game.Location, os []game.Location) bool {
+	if !isSafe(gs, me, nil, longSearch) {
+		return false
+	}
+	for _, o := range os {
+		if !isSafe(gs, me, &o, shortSearch) {
+			return false
+		}
+	}
+	return true
+}
+
+func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
+	nextGS, locs := gs.Next()
+	if locs.Contains(me) {
+		return false
+	}
+	if d.opponent == 0 {
+		o = nil
+	}
+	if o != nil && locs.Contains(*o) {
+		o = nil
+	}
+	if d.me > 0 {
+		nd := d.next()
+		for _, loc := range me.Moves(gs) {
+			if safetyByOpponent(nextGS, loc, o, nd) {
+				return true
+			}
+		}
+		return false
+	}
+	return true
+}
+
+func safetyByOpponent(gs *game.State, me game.Location, o *game.Location, d depth) bool {
+	if o == nil {
+		return isSafe(gs, me, o, d)
+	}
+	for _, a := range actions(*o, gs, true) {
+		if !isSafe(a.state, me, &a.nextLocation, d) {
+			return false
+		}
+	}
+	return true
 }
