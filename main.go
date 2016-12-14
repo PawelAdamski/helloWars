@@ -9,6 +9,7 @@ import (
 
 	"github.com/PawelAdamski/helloWars/bf"
 	"github.com/PawelAdamski/helloWars/game"
+	"github.com/PawelAdamski/helloWars/manual"
 )
 
 var manualMod = flag.Bool("manual", false, "enable manual mode")
@@ -21,7 +22,7 @@ func main() {
 	if *manualMod {
 		fmt.Println("Manual mode")
 		BotName = "manual"
-		BotAlgorithm = bf.Strategy{}
+		BotAlgorithm = manual.Strategy{}
 		port = "8081"
 	} else {
 		BotAlgorithm = bf.Strategy{}
