@@ -39,7 +39,7 @@ func stateWithMissile(gs *game.State, loc game.Location, d game.Direction) *game
 	gsWithMissiles := *gs
 	gsWithMissiles.Missiles = append([]game.Missile{}, gs.Missiles...)
 	gsWithMissiles.Missiles = append(gsWithMissiles.Missiles, game.Missile{
-		Location:        loc.Translate(d),
+		Location:        loc,
 		ExplosionRadius: gs.GameConfig.MissileBlastRadius,
 		MoveDirection:   *d.AsResponse(),
 	})

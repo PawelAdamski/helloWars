@@ -31,7 +31,7 @@ type botMove struct {
 }
 
 var longSearch = depth{
-	me:       7,
+	me:       8,
 	opponent: 2,
 }
 
