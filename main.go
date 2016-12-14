@@ -18,7 +18,6 @@ var BotAlgorithm game.Algorithm
 
 func main() {
 	flag.Parse()
-	fmt.Println(*manualMod)
 	if *manualMod {
 		fmt.Println("Manual mode")
 		BotName = "manual"
