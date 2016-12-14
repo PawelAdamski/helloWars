@@ -47,26 +47,48 @@ func (ss Strategy) NextAction(s *game.State) game.BotMove {
 	if len(dirs) == 0 {
 		return game.BotMove{}
 	}
-	r := 0.0
-	argRand := game.BotMove{}
+	if mv, ok := findKillingMove(dirs, s); ok {
+		return mv
+	}
+	if mv, ok := findSameDirectionMove(dirs, s); ok {
+		return mv
+	}
+	return findAnyMove(dirs)
+}
+
+func findKillingMove(dirs []direction, s *game.State) (game.BotMove, bool) {
 	for _, dir := range dirs {
 		for _, a := range dir.actions {
 			for _, o := range s.OpponentLocations {
 				if a.action != game.None && !isSafe(a.state, o, &s.BotLocation, shortSearch) {
-					return a.toMove()
+					return a.toMove(), true
 				}
-				f := rand.Float64()
-				if sameDirection(dir.direction, &s.BotLocation, &o) {
-					f += 0.25
-				}
-				if r < f {
-					r = f
-					argRand = a.toMove()
-				}
+
 			}
 		}
 	}
-	return argRand
+	return game.BotMove{}, false
+}
+
+func findSameDirectionMove(dirs []direction, s *game.State) (game.BotMove, bool) {
+	for _, dir := range dirs {
+		for _, o := range s.OpponentLocations {
+			if sameDirection(dir.direction, &s.BotLocation, &o) {
+				return dir.actions[rand.Intn(len(dir.actions))].toMove(), true
+			}
+		}
+	}
+	return game.BotMove{}, false
+}
+
+func findAnyMove(dirs []direction) game.BotMove {
+	as := []action{}
+	for _, dir := range dirs {
+		for _, a := range dir.actions {
+			as = append(as, a)
+		}
+	}
+	return as[rand.Intn(len(as))].toMove()
 }
 
 func sameDirection(d game.Direction, a, b *game.Location) bool {

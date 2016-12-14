@@ -22,6 +22,7 @@ func performNextMoveHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Can't unmarshal", err, string(bb))
 	}
 	nm := BotAlgorithm.NextAction(&gs)
+	fmt.Println(nm.String())
 	bb, err = json.Marshal(nm)
 	if err != nil {
 		fmt.Println("Can't marshall BotMove")

@@ -86,11 +86,14 @@ func (s *State) moveMissiles() {
 		d := Directions[s.Missiles[i].MoveDirection]
 		location := s.Missiles[i].Location
 		nextLocation := location.Translate(d)
-		if s.collision(nextLocation, 0) || s.collision(location, 1) {
+		if s.collision(nextLocation, 0) {
+			s.Missiles[i].hasExploded = true
+		} else if s.Missiles[i].oldMissile && s.collision(location, 1) {
 			s.Missiles[i].hasExploded = true
 		} else {
 			s.Missiles[i].Location = nextLocation
 		}
+		s.Missiles[i].oldMissile = true
 		if s.GameConfig.IsFastMissileModeEnabled {
 			nextLocation.move(d)
 			if s.collision(nextLocation, 0) {
@@ -220,7 +223,7 @@ func (l *Location) Moves(gs *State) map[Direction]Location {
 			dirLoc[d] = t
 		}
 	}
-	add(Direction{X: 0, Y: 0})
+	dirLoc[Direction{}] = *l
 	add(Direction{X: 1, Y: 0})
 	add(Direction{X: -1, Y: 0})
 	add(Direction{X: 0, Y: 1})
@@ -295,6 +298,7 @@ type Missile struct {
 	Location        Location
 	ExplosionRadius int
 	hasExploded     bool
+	oldMissile      bool
 }
 
 func (m *Missile) IsInRadius(l Location) bool {
@@ -344,8 +348,12 @@ func (bm *BotMove) String() string {
 		direction = fmt.Sprint(*bm.Direction)
 		d = Directions[*bm.Direction]
 	}
-	return fmt.Sprintf("Direction: %s (%v), action: %v, fire: %d",
-		direction, d, bm.Action, bm.FireDirection)
+	fire := ""
+	if bm.Action == FireMissile {
+		fire = fmt.Sprint(Directions[bm.FireDirection])
+	}
+	return fmt.Sprintf("Direction: %s (%v), action: %v, fire: %d (%s)",
+		direction, d, bm.Action, bm.FireDirection, fire)
 
 }
 

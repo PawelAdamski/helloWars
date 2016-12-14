@@ -56,16 +56,49 @@ func (s *BombSafeSuite) TestMissileDirections(c *C) {
 func (s *BombSafeSuite) TestEscapingFromOpponentMissile(c *C) {
 	gs := game.State{
 		Board: [][]int{
-			{game.Regular, game.Empty, game.Regular, game.Regular, game.Regular, game.Regular},
+			{game.Empty, game.Empty, game.Regular, game.Regular, game.Regular, game.Regular},
 			{game.Empty, game.Empty, game.Empty, game.Empty, game.Empty, game.Empty},
-			{game.Empty, game.Empty, game.Empty, game.Regular, game.Empty, game.Regular},
+			{game.Empty, game.Empty, game.Regular, game.Regular, game.Empty, game.Regular},
 		},
 		GameConfig: game.Config{
 			IsFastMissileModeEnabled: true,
 			MissileBlastRadius:       3,
 		},
-		OpponentLocations: []game.Location{{X: 0, Y: 1}},
+		OpponentLocations: []game.Location{{X: 1, Y: 0}},
 	}
-	dirs := directions(&gs, game.Location{X: 0, Y: 4})
+	dirs := directions(&gs, game.Location{X: 1, Y: 4})
 	c.Assert(dirs, HasLen, 1)
+}
+
+func (s *BombSafeSuite) TestDoesNotShootMissileAtSelf(c *C) {
+	gs := game.State{
+		Board: [][]int{
+			{game.Empty, game.Empty, game.Empty, game.Empty, game.Empty, game.Empty, game.Empty},
+		},
+		GameConfig: game.Config{
+			IsFastMissileModeEnabled: true,
+			MissileBlastRadius:       5,
+		},
+	}
+	dirs := directions(&gs, game.Location{X: 0, Y: 3})
+	c.Assert(dirs, HasLen, 3)
+	c.Assert(dirs[0].missiles, HasLen, 0)
+	c.Assert(dirs[1].missiles, HasLen, 0)
+	c.Assert(dirs[2].missiles, HasLen, 0)
+}
+
+func (s *BombSafeSuite) TestCanShootMissile(c *C) {
+	gs := game.State{
+		Board: [][]int{
+			{game.Empty, game.Empty, game.Empty, game.Empty, game.Empty, game.Empty},
+		},
+		GameConfig: game.Config{
+			IsFastMissileModeEnabled: true,
+			MissileBlastRadius:       3,
+		},
+	}
+	dirs := directions(&gs, game.Location{X: 0, Y: 0})
+	c.Assert(dirs, HasLen, 2)
+	c.Assert(dirs[0].missiles, HasLen, 1)
+	c.Assert(dirs[1].missiles, HasLen, 1)
 }

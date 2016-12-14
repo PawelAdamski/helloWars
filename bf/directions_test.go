@@ -78,6 +78,48 @@ func (s *BombSafeSuite) TestRunsForCover3(c *C) {
 	c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
 }
 
+func (s *BombSafeSuite) TestRunsForCover4(c *C) {
+	roundsUntilExplodes := 2
+	loc := game.Location{X: 1, Y: 0}
+	gs := game.State{
+		BotLocation: loc,
+		Board: [][]int{
+			{game.Empty, game.Empty, game.Empty},
+			{game.Empty, game.Empty, game.Empty},
+		},
+		Bombs: []game.Bomb{
+			{
+				RoundsUntilExplodes: roundsUntilExplodes,
+				Location: game.Location{
+					X: 0,
+					Y: 0,
+				},
+				ExplosionRadius: 2,
+			},
+			{
+				RoundsUntilExplodes: roundsUntilExplodes,
+				Location: game.Location{
+					X: 0,
+					Y: 1,
+				},
+				ExplosionRadius: 2,
+			},
+		},
+		GameConfig: game.Config{
+			BombBlastRadius: 3,
+		},
+	}
+	cgs := gs
+	dirs := directions(&cgs, loc)
+	c.Assert(dirs, HasLen, 1)
+	c.Assert(dirs[0].canDropBomb, Equals, false)
+
+	strategy := Strategy{}
+	nm := strategy.NextAction(&gs)
+	c.Assert(nm.Direction, NotNil)
+	c.Assert(*nm.Direction, Equals, game.Down)
+}
+
 func (s *BombSafeSuite) TestTriesToSetBombs(c *C) {
 	roundsUntilExplodes := 4
 	gs := game.State{

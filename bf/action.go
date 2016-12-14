@@ -73,7 +73,7 @@ func actions(l game.Location, s *game.State, checkMissiles bool) []action {
 							nextLocation: loc,
 							action:       game.FireMissile,
 							missile:      missleDir,
-							state:        stateWithMissile(s, loc, missleDir),
+							state:        stateWithMissile(s, loc.Translate(direction), missleDir),
 						})
 				}
 
