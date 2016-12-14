@@ -13,9 +13,11 @@ type info struct {
 	GameType    string `json:"GameType"`
 }
 
+var BotName = "PAKD"
+
 func infoHandler(w http.ResponseWriter, r *http.Request) {
 	i := info{
-		Name:        "PAKD",
+		Name:        BotName,
 		Avatar:      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Ladle_steel_18j07.JPG/1920px-Ladle_steel_18j07.JPG",
 		Description: "All your base are belong to us",
 		GameType:    "TankBlaster",

@@ -40,7 +40,9 @@ var shortSearch = depth{
 	opponent: 2,
 }
 
-func NextMove(s *game.State) game.BotMove {
+type Strategy struct{}
+
+func (ss Strategy) NextAction(s *game.State) game.BotMove {
 	dirs := directions(s, s.BotLocation)
 	if len(dirs) == 0 {
 		return game.BotMove{}

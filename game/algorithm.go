@@ -17,7 +17,7 @@ var Directions = map[int]Direction{
 var inverseDirections = map[Direction]int{}
 
 type Algorithm interface {
-	nextAction(State) BotMove
+	NextAction(*State) BotMove
 }
 
 // Board of the game

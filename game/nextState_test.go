@@ -219,13 +219,71 @@ func (s *NextStateSuite) TestChainedMissleExplosion(c *C) {
 	c.Assert(len(nextState.Missiles), Equals, 0)
 }
 
+func (s *NextStateSuite) TestChainedMisslesAndBombsWithFastModeExplosion(c *C) {
+	state := State{
+		Board: board(7, 7, Location{X: 6, Y: 2}),
+		Bombs: []Bomb{
+			Bomb{
+				RoundsUntilExplodes: 10,
+				ExplosionRadius:     2,
+				Location:            Location{X: 5, Y: 4}},
+		},
+		Missiles: Missiles{
+			Missile{
+				ExplosionRadius: 2,
+				Location:        Location{X: 3, Y: 2},
+				MoveDirection:   Right,
+			},
+			Missile{
+				ExplosionRadius: 2,
+				Location:        Location{X: 1, Y: 4},
+				MoveDirection:   Right,
+			},
+		},
+		GameConfig: Config{IsFastMissileModeEnabled: true},
+	}
+	nextState, _ := state.Next()
+	nextState, explosions := nextState.Next()
+
+	expectedExplosions := Locations{
+		Location{X: 1, Y: 4},
+
+		Location{X: 2, Y: 4},
+
+		Location{X: 3, Y: 2},
+		Location{X: 3, Y: 3},
+		Location{X: 3, Y: 4},
+		Location{X: 3, Y: 5},
+		Location{X: 3, Y: 6},
+
+		Location{X: 4, Y: 2},
+		Location{X: 4, Y: 4},
+
+		Location{X: 5, Y: 0},
+		Location{X: 5, Y: 1},
+		Location{X: 5, Y: 2},
+		Location{X: 5, Y: 3},
+		Location{X: 5, Y: 4},
+		Location{X: 5, Y: 5},
+		Location{X: 5, Y: 6},
+
+		Location{X: 6, Y: 2},
+		Location{X: 6, Y: 4},
+	}
+	sort.Sort(ByLocation(expectedExplosions))
+	sort.Sort(ByLocation(explosions))
+	c.Assert(explosions, DeepEquals, expectedExplosions)
+	c.Assert(len(nextState.Bombs), Equals, 0)
+	c.Assert(len(nextState.Missiles), Equals, 0)
+}
+
 func board(width, height int, walls ...Location) Board {
 	b := Board{}
 	for i := 0; i < width; i++ {
 		b = append(b, make([]int, height))
 	}
 	for _, w := range walls {
-		b[w.Y][w.X] = 1
+		b[w.X][w.Y] = 1
 	}
 	return b
 }

@@ -9,8 +9,7 @@ func NextMove(s *game.State) game.BotMove {
 	_, explosions := s.Next()
 	var botDirection *int
 	for di, d := range game.Directions {
-		nextPosition := s.BotLocation
-		nextPosition.Translate(d)
+		nextPosition := s.BotLocation.Translate(d)
 		if s.IsEmpty(&nextPosition) && !explosions.Contains(nextPosition) {
 			dic := di
 			botDirection = &dic
