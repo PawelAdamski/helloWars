@@ -39,7 +39,7 @@ func stateWithMissile(gs *game.State, loc game.Location, d game.Direction) *game
 	gsWithMissiles := *gs
 	gsWithMissiles.Missiles = append([]game.Missile{}, gs.Missiles...)
 	gsWithMissiles.Missiles = append(gsWithMissiles.Missiles, game.Missile{
-		Location:        loc,
+		Location:        loc.Translate(d),
 		ExplosionRadius: gs.GameConfig.MissileBlastRadius,
 		MoveDirection:   *d.AsResponse(),
 	})
@@ -64,21 +64,21 @@ func actions(l game.Location, s *game.State, checkMissiles bool) []action {
 				state:        stateWithBomb(s, l, bombsExplodeIn),
 			},
 		)
-		if checkMissiles {
-			for _, missleDir := range game.Directions {
-				if missleDir.X != 0 || missleDir.Y != 0 {
-					actions = append(actions,
-						action{
-							direction:    direction,
-							nextLocation: loc,
-							action:       game.FireMissile,
-							missile:      missleDir,
-							state:        stateWithMissile(s, loc.Translate(direction), missleDir),
-						})
-				}
-
-			}
-		}
+		//if checkMissiles {
+		//	for _, missleDir := range game.Directions {
+		//		if missleDir.X != 0 || missleDir.Y != 0 {
+		//			actions = append(actions,
+		//				action{
+		//					direction:    direction,
+		//					nextLocation: loc,
+		//					action:       game.FireMissile,
+		//					missile:      missleDir,
+		//					state:        stateWithMissile(s, loc, missleDir),
+		//				})
+		//		}
+		//
+		//	}
+		//}
 
 	}
 	return actions
