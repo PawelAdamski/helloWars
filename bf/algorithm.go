@@ -32,13 +32,13 @@ type botMove struct {
 
 var longSearch = depth{
 	me:            8,
-	opponent:      2,
+	opponent:      3,
 	opponentFires: 1,
 }
 
 var shortSearch = depth{
 	me:            5,
-	opponent:      2,
+	opponent:      3,
 	opponentFires: 1,
 }
 
@@ -170,17 +170,39 @@ func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
 	if o != nil {
 		gs.OpponentLocations = []game.Location{*o}
 	}
-	nextGS, locs := gs.Next()
+	if o == nil {
+		nextGS, locs := gs.Next()
+		if locs.Contains(me) {
+			return false
+		}
+		if d.me > 0 {
+			nd := d.next()
+			for _, loc := range me.Moves(nextGS) {
+				if isSafe(nextGS, loc, nil, nd) {
+					return true
+				}
+			}
+			return false
+		}
+		return true
+	}
+	for _, a := range actions(*o, gs, true) {
+		if !isActionSafe(a, me, d) {
+			return false
+		}
+	}
+	return true
+}
+
+func isActionSafe(a action, me game.Location, d depth) bool {
+	nextGS, locs := a.state.Next()
 	if locs.Contains(me) {
 		return false
 	}
-	if o != nil && locs.Contains(*o) {
-		o = nil
-	}
 	if d.me > 0 {
 		nd := d.next()
-		for _, loc := range me.Moves(gs) {
-			if safetyByOpponent(nextGS, loc, o, nd) {
+		for _, loc := range me.Moves(nextGS) {
+			if isSafe(nextGS, loc, nil, nd) {
 				return true
 			}
 		}
@@ -193,18 +215,6 @@ func safetyByOpponent(gs *game.State, me game.Location, o *game.Location, d dept
 	if o == nil {
 		return isSafe(gs, me, o, d)
 	}
-	for _, a := range actions(*o, gs, true) {
-		actionDepth := d
-		if a.action == game.FireMissile {
-			if actionDepth.opponentFires == 0 {
-				continue
-			} else {
-				actionDepth.opponentFires--
-			}
-		}
-		if !isSafe(a.state, me, &a.nextLocation, actionDepth) {
-			return false
-		}
-	}
+
 	return true
 }

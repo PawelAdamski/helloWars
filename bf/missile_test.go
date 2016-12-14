@@ -90,10 +90,9 @@ func (s *BombSafeSuite) TestEscapingFromOpponentMissile(c *C) {
 		},
 		OpponentLocations: []game.Location{{X: 1, Y: 0}},
 	}
-	c.Assert(isSafe(&gs, game.Location{1, 3}, &game.Location{X: 1, Y: 0}, depth{me: 6, opponent: 2, opponentFires: 1}), Equals, false)
-	//dirs := directions(&gs, game.Location{X: 1, Y: 3})
-	//c.Assert(dirs, HasLen, 1)
-	//c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
+	dirs := directions(&gs, game.Location{X: 1, Y: 3})
+	c.Assert(dirs, HasLen, 1)
+	c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
 }
 
 func (s *BombSafeSuite) TestDoesNotShootMissileAtSelf(c *C) {
