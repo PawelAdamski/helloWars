@@ -120,7 +120,7 @@ func isSafeAgainstAll(gs *game.State, me game.Location, os []game.Location) bool
 		return false
 	}
 	for _, o := range os {
-		if !isSafe(gs, me, &o, shortSearch) {
+		if !isSafe(gs, me, &o, longSearch) {
 			return false
 		}
 	}
@@ -128,6 +128,9 @@ func isSafeAgainstAll(gs *game.State, me game.Location, os []game.Location) bool
 }
 
 func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
+	if d.opponent == 0 {
+		o = nil
+	}
 	gs.BotLocation = me
 	if o != nil {
 		gs.OpponentLocations = []game.Location{*o}
@@ -135,12 +138,6 @@ func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
 	nextGS, locs := gs.Next()
 	if locs.Contains(me) {
 		return false
-	}
-	if gs.IsMissileLocation(me) {
-		return false
-	}
-	if d.opponent == 0 {
-		o = nil
 	}
 	if o != nil && locs.Contains(*o) {
 		o = nil

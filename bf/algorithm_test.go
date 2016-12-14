@@ -7,18 +7,6 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func assertAvoidable(s int, avoidable bool, c *C) {
-	if avoidable {
-		if s == 0 {
-			c.Fatalf("Expected avoidable, got %d", s)
-		}
-	} else {
-		if s != 0 {
-			c.Fatalf("Expected not avoidable, got %d", s)
-		}
-	}
-}
-
 func Test(t *testing.T) { TestingT(t) }
 
 type BombSafeSuite struct{}
