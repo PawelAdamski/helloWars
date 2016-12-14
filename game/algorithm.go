@@ -68,8 +68,17 @@ func (s *State) IsEmpty(l *Location) bool {
 	return s.Board[l.X][l.Y] == Empty
 }
 
+func (s *State) IsMissileLocation(l Location) bool {
+	for _, m := range s.Missiles {
+		if m.Location == l {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *State) CanMoveTo(l *Location) bool {
-	return s.IsInside(l) && s.IsEmpty(l)
+	return s.IsInside(l) && s.IsEmpty(l) && !s.IsMissileLocation(*l)
 }
 
 func (s *State) moveMissiles() {

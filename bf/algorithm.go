@@ -32,11 +32,11 @@ type botMove struct {
 
 var longSearch = depth{
 	me:       7,
-	opponent: 3,
+	opponent: 2,
 }
 
 var shortSearch = depth{
-	me:       6,
+	me:       5,
 	opponent: 2,
 }
 
@@ -53,7 +53,11 @@ func NextMove(s *game.State) game.BotMove {
 				if a.action != game.None && !isSafe(a.state, o, &s.BotLocation, shortSearch) {
 					return a.toMove()
 				}
-				if f := rand.Float64(); r < f {
+				f := rand.Float64()
+				if sameDirection(dir.direction, &s.BotLocation, &o) {
+					f += 0.25
+				}
+				if r < f {
 					r = f
 					argRand = a.toMove()
 				}
@@ -61,6 +65,27 @@ func NextMove(s *game.State) game.BotMove {
 		}
 	}
 	return argRand
+}
+
+func sameDirection(d game.Direction, a, b *game.Location) bool {
+	dx := b.X - a.X
+	dy := b.Y - a.Y
+
+	sdx := 0
+	if dx < 0 {
+		sdx = -1
+	} else if dx > 0 {
+		sdx = 1
+	}
+
+	sdy := 0
+	if dy < 0 {
+		sdy = -1
+	} else if dx > 0 {
+		sdy = 1
+	}
+
+	return d.X == sdx || d.Y == sdy
 }
 
 func directions(gs *game.State, me game.Location) []direction {
@@ -105,6 +130,9 @@ func isSafeAgainstAll(gs *game.State, me game.Location, os []game.Location) bool
 func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
 	nextGS, locs := gs.Next()
 	if locs.Contains(me) {
+		return false
+	}
+	if gs.IsMissileLocation(me) {
 		return false
 	}
 	if d.opponent == 0 {
