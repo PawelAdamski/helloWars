@@ -2,12 +2,9 @@ package game
 
 import (
 	"encoding/json"
-	"testing"
 
 	. "gopkg.in/check.v1"
 )
-
-func Test(t *testing.T) { TestingT(t) }
 
 type ParsingSuite struct{}
 

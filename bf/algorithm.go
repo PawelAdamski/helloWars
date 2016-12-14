@@ -43,7 +43,7 @@ var shortSearch = depth{
 type Strategy struct{}
 
 func (ss Strategy) NextAction(s *game.State) game.BotMove {
-	dirs := directions(s, s.BotLocation)
+	dirs := relaxedDirections(*s, s.BotLocation)
 	if len(dirs) == 0 {
 		return game.BotMove{}
 	}
@@ -110,6 +110,15 @@ func sameDirection(d game.Direction, a, b *game.Location) bool {
 	}
 
 	return d.X == sdx || d.Y == sdy
+}
+
+func relaxedDirections(gs game.State, me game.Location) []direction {
+	dirs := directions(&gs, me)
+	if len(dirs) != 0 {
+		return dirs
+	}
+	gs.OpponentLocations = nil
+	return directions(&gs, me)
 }
 
 func directions(gs *game.State, me game.Location) []direction {

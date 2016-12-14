@@ -1,14 +1,10 @@
 package game
 
 import (
-	"testing"
-
 	"sort"
 
 	. "gopkg.in/check.v1"
 )
-
-func TestNextState(t *testing.T) { TestingT(t) }
 
 type NextStateSuite struct{}
 
@@ -117,7 +113,7 @@ func (s *NextStateSuite) TestBombExplosion(c *C) {
 	c.Assert(len(nextState.Bombs), Equals, 0)
 }
 
-func (s *NextStateSuite) TestMissisleExplosion(c *C) {
+func (s *NextStateSuite) TestMissileExplosion(c *C) {
 	state := State{
 		Board: board(7, 7, Location{X: 3, Y: 3}),
 		Missiles: []Missile{Missile{
@@ -184,7 +180,7 @@ func (s *NextStateSuite) TestChainedBombExplosion(c *C) {
 	c.Assert(len(nextState.Bombs), Equals, 0)
 }
 
-func (s *NextStateSuite) TestChainedMissleExplosion(c *C) {
+func (s *NextStateSuite) TestChainedMissileExplosion(c *C) {
 	state := State{
 		Board: board(7, 7),
 		Bombs: []Bomb{
@@ -217,6 +213,32 @@ func (s *NextStateSuite) TestChainedMissleExplosion(c *C) {
 	c.Assert(explosions, DeepEquals, expectedExplosions)
 	c.Assert(len(nextState.Bombs), Equals, 0)
 	c.Assert(len(nextState.Missiles), Equals, 0)
+}
+
+func (s *NextStateSuite) TestMissilesMove(c *C) {
+	state := State{
+		Board: board(7, 7),
+		Missiles: Missiles{
+			Missile{
+				ExplosionRadius: 1,
+				Location:        Location{X: 0, Y: 0},
+				MoveDirection:   Down,
+			},
+			Missile{
+				ExplosionRadius: 1,
+				Location:        Location{X: 1, Y: 1},
+				MoveDirection:   Down,
+			},
+		}}
+	nextState, explosions := state.Next()
+	c.Assert(explosions, HasLen, 0)
+	c.Assert(nextState.Missiles, HasLen, 2)
+
+	c.Assert(nextState.Missiles[0].Location, Equals, Location{X: 0, Y: 1})
+	c.Assert(nextState.Missiles[1].Location, Equals, Location{X: 1, Y: 2})
+
+	c.Assert(state.Missiles[0].Location, Equals, Location{X: 0, Y: 0})
+	c.Assert(state.Missiles[1].Location, Equals, Location{X: 1, Y: 1})
 }
 
 func (s *NextStateSuite) TestChainedMisslesAndBombsWithFastModeExplosion(c *C) {

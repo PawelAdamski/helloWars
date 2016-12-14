@@ -68,6 +68,7 @@ func (s *BombSafeSuite) TestMissileDeflection(c *C) {
 		},
 		GameConfig: game.Config{
 			IsFastMissileModeEnabled: true,
+			BombBlastRadius:          2,
 		},
 	}
 	dirs := directions(&gs, game.Location{X: 0, Y: 2})
@@ -85,22 +86,24 @@ func (s *BombSafeSuite) TestEscapingFromOpponentMissile(c *C) {
 		GameConfig: game.Config{
 			IsFastMissileModeEnabled: true,
 			MissileBlastRadius:       3,
+			BombBlastRadius:          2,
 		},
-		Missiles: []game.Missile{
-			{
-				Location: game.Location{
-					X: 1,
-					Y: 2,
-				},
-				ExplosionRadius: 1,
-				MoveDirection:   game.Down,
-			},
-		},
-		//OpponentLocations: []game.Location{{X: 1, Y: 0}},
+		//Missiles: []game.Missile{
+		//	{
+		//		Location: game.Location{
+		//			X: 1,
+		//			Y: 2,
+		//		},
+		//		ExplosionRadius: 1,
+		//		MoveDirection:   game.Down,
+		//	},
+		//},
+		OpponentLocations: []game.Location{{X: 1, Y: 0}},
 	}
-	dirs := directions(&gs, game.Location{X: 1, Y: 3})
-	c.Assert(dirs, HasLen, 1)
-	c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
+	c.Assert(isSafe(&gs, game.Location{0, 3}, &game.Location{X: 1, Y: 1}, depth{me: 6, opponent: 1}), Equals, true)
+	//dirs := directions(&gs, game.Location{X: 1, Y: 3})
+	//c.Assert(dirs, HasLen, 1)
+	//c.Assert(dirs[0].direction, Equals, game.Direction{X: -1, Y: 0})
 }
 
 func (s *BombSafeSuite) TestDoesNotShootMissileAtSelf(c *C) {
