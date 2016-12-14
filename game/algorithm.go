@@ -84,16 +84,16 @@ func (s *State) CanMoveTo(l *Location) bool {
 func (s *State) moveMissiles() {
 	for i := range s.Missiles {
 		d := Directions[s.Missiles[i].MoveDirection]
-		nextLocation := s.Missiles[i].Location
-		nextLocation.move(d)
-		if s.collision(nextLocation) {
+		location := s.Missiles[i].Location
+		nextLocation := location.Translate(d)
+		if s.collision(nextLocation, 0) || s.collision(location, 1) {
 			s.Missiles[i].hasExploded = true
 		} else {
 			s.Missiles[i].Location = nextLocation
 		}
 		if s.GameConfig.IsFastMissileModeEnabled {
 			nextLocation.move(d)
-			if s.collision(nextLocation) {
+			if s.collision(nextLocation, 0) {
 				s.Missiles[i].hasExploded = true
 			}
 		}
@@ -107,12 +107,13 @@ func (s *State) isBotLocation(l Location) bool {
 	return Locations(s.OpponentLocations).Contains(l)
 }
 
-func (s *State) collision(l Location) bool {
-	return !s.IsEmpty(&l) ||
+func (s *State) collision(l Location, nbOfMissiles int) bool {
+	r := !s.IsEmpty(&l) ||
 		!s.IsInside(&l) ||
 		s.Bombs.contains(l) ||
 		s.isBotLocation(l) ||
-		s.isBotLocation(l)
+		s.Missiles.count(l) > nbOfMissiles
+	return r
 }
 
 // Config of the game
@@ -301,6 +302,16 @@ func (m *Missile) IsInRadius(l Location) bool {
 }
 
 type Missiles []Missile
+
+func (ms Missiles) count(l Location) int {
+	c := 0
+	for _, m := range ms {
+		if m.Location == l {
+			c++
+		}
+	}
+	return c
+}
 
 func (ms Missiles) findExploding() (int, Missile) {
 	for i, m := range ms {

@@ -6,12 +6,13 @@ import (
 )
 
 func (s *BombSafeSuite) TestSimpleMissiles(c *C) {
-	//s.testSimpleMissiles(false, c)
+	s.testSimpleMissiles(false, c)
 	s.testSimpleMissiles(true, c)
 }
 
 func (s *BombSafeSuite) testSimpleMissiles(fastMissilesEnabled bool, c *C) {
 	gs := game.State{
+		BotLocation: game.Location{X: 0, Y: 2},
 		Board: [][]int{
 			{game.Empty, game.Empty, game.Empty, game.Empty},
 			{game.Empty, game.Empty, game.Empty, game.Empty},

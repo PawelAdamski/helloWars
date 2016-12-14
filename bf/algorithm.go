@@ -128,6 +128,10 @@ func isSafeAgainstAll(gs *game.State, me game.Location, os []game.Location) bool
 }
 
 func isSafe(gs *game.State, me game.Location, o *game.Location, d depth) bool {
+	gs.BotLocation = me
+	if o != nil {
+		gs.OpponentLocations = []game.Location{*o}
+	}
 	nextGS, locs := gs.Next()
 	if locs.Contains(me) {
 		return false
