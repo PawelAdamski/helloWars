@@ -31,13 +31,15 @@ type botMove struct {
 }
 
 var longSearch = depth{
-	me:       8,
-	opponent: 2,
+	me:            8,
+	opponent:      2,
+	opponentFires: 1,
 }
 
 var shortSearch = depth{
-	me:       5,
-	opponent: 2,
+	me:            5,
+	opponent:      2,
+	opponentFires: 1,
 }
 
 type Strategy struct{}
@@ -192,7 +194,15 @@ func safetyByOpponent(gs *game.State, me game.Location, o *game.Location, d dept
 		return isSafe(gs, me, o, d)
 	}
 	for _, a := range actions(*o, gs, true) {
-		if !isSafe(a.state, me, &a.nextLocation, d) {
+		actionDepth := d
+		if a.action == game.FireMissile {
+			if actionDepth.opponentFires == 0 {
+				continue
+			} else {
+				actionDepth.opponentFires--
+			}
+		}
+		if !isSafe(a.state, me, &a.nextLocation, actionDepth) {
 			return false
 		}
 	}
