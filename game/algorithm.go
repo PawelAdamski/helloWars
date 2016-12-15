@@ -50,7 +50,7 @@ type State struct {
 	Board              Board
 	BotID              string `json:"BotId"`
 	BotLocation        Location
-	IsMissileAvailable bool
+	MissileAvailableIn int
 	OpponentLocations  []Location
 	Bombs              Bombs
 	Missiles           Missiles

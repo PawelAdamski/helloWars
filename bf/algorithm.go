@@ -52,9 +52,16 @@ func (ss Strategy) NextAction(s *game.State) game.BotMove {
 	if mv, ok := findKillingMove(dirs, s); ok {
 		return mv
 	}
+	if mv, ok := findShootMove(dirs, s); ok {
+		return mv
+	}
+	if mv, ok := findBombMove(dirs, s); ok {
+		return mv
+	}
 	if mv, ok := findSameDirectionMove(dirs, s); ok {
 		return mv
 	}
+
 	return findAnyMove(dirs)
 }
 
@@ -77,6 +84,36 @@ func findSameDirectionMove(dirs []direction, s *game.State) (game.BotMove, bool)
 		for _, o := range s.OpponentLocations {
 			if sameDirection(dir.direction, &s.BotLocation, &o) {
 				return dir.actions[rand.Intn(len(dir.actions))].toMove(), true
+			}
+		}
+
+	}
+	return game.BotMove{}, false
+}
+
+func findShootMove(dirs []direction, s *game.State) (game.BotMove, bool) {
+	for _, dir := range dirs {
+		for _, a := range dir.actions {
+			if a.action != game.FireMissile {
+				continue
+			}
+			for _, o := range s.OpponentLocations {
+				if sameDirection(a.missile, &a.nextLocation, &o) {
+					return a.toMove(), true
+				}
+
+			}
+
+		}
+	}
+	return game.BotMove{}, false
+}
+
+func findBombMove(dirs []direction, s *game.State) (game.BotMove, bool) {
+	for _, dir := range dirs {
+		for _, a := range dir.actions {
+			if a.action == game.DropBomb {
+				return a.toMove(), true
 			}
 		}
 	}
@@ -107,10 +144,15 @@ func sameDirection(d game.Direction, a, b *game.Location) bool {
 	sdy := 0
 	if dy < 0 {
 		sdy = -1
-	} else if dx > 0 {
+	} else if dy > 0 {
 		sdy = 1
 	}
 
+	if sdx == 0 {
+		return d.Y == sdy
+	} else if sdy == 0 {
+		return d.X == sdx
+	}
 	return d.X == sdx || d.Y == sdy
 }
 
@@ -125,7 +167,7 @@ func relaxedDirections(gs game.State, me game.Location) []direction {
 
 func directions(gs *game.State, me game.Location) []direction {
 	dirMap := map[game.Direction]*direction{}
-	for _, a := range actions(me, gs, true) {
+	for _, a := range actions(me, gs, gs.MissileAvailableIn == 0) {
 		if isSafeAgainstAll(a.state, a.nextLocation, gs.OpponentLocations) {
 			if _, ok := dirMap[a.direction]; !ok {
 				dirMap[a.direction] = &direction{
